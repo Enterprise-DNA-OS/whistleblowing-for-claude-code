@@ -1,14 +1,33 @@
 [
   {
     "name": "week",
-    "title": "This week",
-    "subtitle": "Whistleblowing for Claude Code: what needs attention, rendered by npm run view",
+    "title": "The speak-up week",
+    "subtitle": "What is late, what is waiting and who is carrying it. Confidential: case officers only.",
     "sections": [
-      {
-        "title": "Needs attention",
-        "note": "TODO(author): point this at the industry's attention view (overdue, stuck, quiet).",
-        "sql": "select 'replace me' as item, 'TODO(author)' as why"
-      }
+      { "title": "Needs attention", "sql": "select priority,ref,category,detail from v_attention order by priority,category,ref" },
+      { "title": "Open cases", "sql": "select ref,entity,category,severity,status,officer,days_open,ack_due,acknowledged_on,last_update_on,next_step,next_step_due from v_reports where status<>'closed' order by case severity when 'high' then 1 when 'medium' then 2 else 3 end,received_on" },
+      { "title": "Case officer workload", "sql": "select name,open_cases,high_severity,overdue_actions,avg_days_to_close from v_workload order by open_cases desc" }
+    ]
+  },
+  {
+    "name": "deadlines",
+    "title": "Deadlines that protect the discloser",
+    "subtitle": "Acknowledgements, updates, actions and retaliation checks, in date order.",
+    "sections": [
+      { "title": "Acknowledgements due", "note": "New Zealand: 20 working days from receipt, counting the holidays table. Australia: office policy.", "sql": "select ref,entity,jurisdiction,received_on,ack_due,ack_due-current_date days_left from v_reports where status<>'closed' and acknowledged_on is null and not no_contact_route order by ack_due" },
+      { "title": "Open actions", "sql": "select ref,report,owner,description,due_on,days_left from v_actions where done_on is null order by due_on" },
+      { "title": "Retaliation checks", "sql": "select ref,report,officer,due_on,days_left from v_retaliation where done_on is null order by due_on" },
+      { "title": "Public interest watch", "note": "Australia: a discloser who told ASIC or APRA may be able to make a public interest disclosure once 90 days have passed. Shown from 75 days.", "sql": "select ref,entity,regulator_told_on,regulator_told_on+90 ninety_day_point from v_reports where jurisdiction='AU' and status<>'closed' and regulator_told_on is not null order by regulator_told_on" }
+    ]
+  },
+  {
+    "name": "programme",
+    "title": "How the programme is working",
+    "subtitle": "Volumes, categories and outcomes. No case detail.",
+    "sections": [
+      { "title": "By entity, last 12 months", "sql": "select name,jurisdiction,kind,reports_12m,anonymous_12m,open_cases,substantiated_12m,policy_review_due from v_entities order by reports_12m desc" },
+      { "title": "By quarter and category", "sql": "select quarter,category,reports,anonymous,substantiated,avg_days_to_close from v_trends order by quarter,reports desc" },
+      { "title": "Identity disclosures", "note": "Every time someone was told who a discloser is, and on what basis.", "sql": "select ref,report,on_date,told,told_by,basis from v_identity order by on_date desc" }
     ]
   }
 ]

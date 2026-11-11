@@ -14,6 +14,7 @@ That layer used to be the whole product, because talking to a database was hard.
 ## What you give up
 
 - **A visual board.** Stages are a table you ask about, not cards you drag.
+- **A reporting form and hotline.** The free version does not take reports from the public. Reports reach you the way they do now (a hotline provider, an anonymous mailbox, a phone line, a manager) and a case officer logs each one with `/intake`. A secure web form that writes straight into this database is something Enterprise DNA builds into the custom version.
 - **A phone app.** It runs where Claude Code runs.
 - **A vendor help desk.** This is open source. Enterprise DNA supports the installed version for businesses that want someone to call.
 

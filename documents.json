@@ -1,11 +1,37 @@
 [
   {
-    "name": "example",
-    "title": "TODO(author): the first document this industry must produce",
-    "for_each": "select gen_random_uuid() as id, 'Example' as name",
+    "name": "case-file",
+    "title": "Confidential case file",
+    "for_each": "select id,ref as name from reports order by ref",
     "file": "name",
     "sections": [
-      { "title": "Details", "sql": "select 'replace me' as item, $1::text as record_id" }
+      { "title": "Case", "layout": "record", "sql": "select ref,entity,jurisdiction,received_on,channel,anonymous,alias,relationship,category,area,severity,status,officer,acknowledged_on,ack_due,protection,regulator_told_on,closed_on,finding,outcome_told_on,days_open from v_reports where id=$1" },
+      { "title": "What was reported", "layout": "record", "sql": "select summary,protection_note,outcome from reports where id=$1" },
+      { "title": "Contact with the discloser", "sql": "select on_date,direction,method,summary from contacts where report_id=$1 order by on_date" },
+      { "title": "Investigation actions", "sql": "select a.ref,p.name owner,a.description,a.due_on,a.done_on,a.result from actions a join people p on p.id=a.owner_id where a.report_id=$1 order by a.due_on" },
+      { "title": "Who was told the discloser's identity", "sql": "select i.on_date,i.told,p.name told_by,i.basis,i.note from identity_disclosures i join people p on p.id=i.told_by where i.report_id=$1 order by i.on_date" },
+      { "title": "Retaliation checks", "sql": "select due_on,done_on,result,note from retaliation_checks where report_id=$1 order by due_on" }
+    ]
+  },
+  {
+    "name": "board-report",
+    "title": "Speak-up report to the board",
+    "for_each": "select id,name from entities where active order by ref",
+    "file": "name",
+    "sections": [
+      { "title": "Summary, last 12 months", "layout": "record", "sql": "select v.name,v.jurisdiction,v.reports_12m,v.anonymous_12m,v.open_cases,v.substantiated_12m,v.policy_on,v.policy_review_due from v_entities v join entities e on e.ref=v.ref where e.id=$1" },
+      { "title": "Reports by category, last 12 months", "sql": "select category,count(*) reports,count(*) filter(where finding in ('substantiated','partly_substantiated')) substantiated,count(*) filter(where status<>'closed') still_open from reports where entity_id=$1 and received_on>=current_date-365 group by category order by reports desc" },
+      { "title": "Open cases", "note": "Reference, category and age only. Case detail stays with the case officer.", "sql": "select ref,category,severity,status,current_date-received_on days_open from reports where entity_id=$1 and status<>'closed' order by received_on" }
+    ]
+  },
+  {
+    "name": "policy-attestation",
+    "title": "Whistleblower policy and procedures register",
+    "for_each": "select id,name from entities where active order by ref",
+    "file": "name",
+    "sections": [
+      { "title": "Entity", "layout": "record", "sql": "select name,jurisdiction,kind,policy_on,policy_location from entities where id=$1" },
+      { "title": "Eligible recipients and case officers", "sql": "select name,role,title,trained_on from people where active and role in ('officer','recipient') and (entity_id=$1 or entity_id is null) order by role,name" }
     ]
   }
 ]

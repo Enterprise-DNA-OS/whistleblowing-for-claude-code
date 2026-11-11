@@ -1,11 +1,12 @@
 ---
-description: Check the records against the rules this industry lives under (the ones listed in docs/compliance.md) and report what is missing, late, or about to breach, with the rule cited.
+description: "Check the case records against the whistleblowing rules in docs/compliance.md, with the source cited for each flag"
 ---
 
-1. Read `docs/compliance.md`. Each rule has a name, the source it comes from, what a breach looks like in the data, and the SQL or command that finds it.
-2. Run each check. Use the CLI's `--json` output or a direct query through `scripts/lib/db.mjs`.
-3. Report as a table: rule, count, the worst example (name and days), the source. Order by severity: breached first, then due within 7 days, then clean.
-4. For anything breached, draft the fix the operator can approve: the record to update, the notice to send (draft to `drafts/`, never send), or the task to add.
-5. If a rule in `docs/compliance.md` is out of date, say so and stop. Do not guess at law. The operator confirms the rule, then you update the doc and the check together.
+# Check the case records against the whistleblowing rules
+
+1. Run `node scripts/speakup.mjs compliance --json`. Each row has the record, the rule, the issue and the source.
+2. Report as a table: rule, record, issue, source. Breached first (overdue acknowledgements, an identity told on an "other" basis, a detriment found), then what falls due in the next week.
+3. For each one, name the fix the operator can approve: acknowledge or update the discloser (draft to `drafts/`, never send), review the identity disclosure with the general counsel, record the retaliation check, or record the policy review.
+4. If a rule in `docs/compliance.md` looks out of date, say so and stop. Do not guess at law. The operator confirms the rule, then you update the doc and the check together.
 
 Nothing here is legal advice. The doc records the rules the operator has told the system to enforce, with sources, and this command checks the data against them.
